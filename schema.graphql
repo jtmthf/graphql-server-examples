@@ -1,0 +1,182 @@
+# For authentication
+type User {
+  # Unique
+  id: String!
+  # Unique
+  email: String!
+  # A JWT token
+  token: String!
+  # Unique
+  username: String!
+  bio: String
+  # URL
+  image: String
+}
+
+type Profile {
+  # Unique
+  id: String!
+  # Unique
+  username: String!
+  bio: String
+  # URL
+  image: String
+  # Requires authentication
+  following: Boolean
+}
+
+type Article {
+  # Unqiue
+  id: String!
+  # Unique URL safe string
+  slug: String!
+  title: String!
+  description: String!
+  body: String!
+  tags(first: Int, last: Int, before: String, after: String): [Tag!]!
+  # ISO 8601
+  createdAt: String!
+  # ISO 8601
+  updatedAt: String!
+  # Requires authentication
+  favorited: Boolean
+  favoritesCount: Int!
+  author: Profile!
+  comments(first: Int, last: Int, before: String, after: String): [Comment!]!
+}
+
+type Comment {
+  # Unique
+  id: String!
+  # ISO 8601
+  createdAt: String!
+  # ISO 8601
+  updatedAt: String!
+  body: String!
+  author: Profile!
+}
+
+type Tag {
+  # Unique
+  id: String!
+  # Unique
+  name: String!
+}
+
+# Optional
+type ArticleFeed {
+  added: [Article!]!
+  updated: [ArticleUpdate!]!
+  removed: [Article!]!
+}
+
+# Optional
+type ArticleUpdate {
+  article: Article!
+  tagsAdded: [Tag!]!
+}
+
+type Query {
+  # Requires authentication
+  me: User!
+  # No authentication required
+  profile(username: String!): Profile
+  # No authentication required
+  articles(
+    tag: String
+    author: String
+    favorited: Boolean
+    first: Int
+    last: Int
+    before: String
+    after: String
+  ): [Article!]!
+  # Requires authentication
+  feed(first: Int, last: Int, before: String, after: String): [Article!]!
+  # No authentication required
+  article(slug: String!): Article
+  # No authentication required
+  tags(first: Int, last: Int, before: String, after: String): [Tag!]!
+}
+
+type Mutation {
+  # No authentication required
+  login(input: LoginPayload!): User!
+  # No authentication required
+  register(input: RegisterPayload!): User!
+  # Requires authentication
+  updateMe(input: UpdateMePayload!): User!
+  # Requires authentication
+  followUser(username: String!): Profile!
+  # Requires authentication
+  unfollowUser(username: String!): Profile!
+  # Requires authentication
+  createArticle(input: CreateArticlePayload!): Article!
+  # Requires authentication
+  updateArticle(input: UpdateArticlePayload!): Article!
+  # Requires authentication
+  deleteArticle(slug: String!): Article!
+  # Requires authentication
+  addComment(slug: String!, body: String!): Comment!
+  # Requires authentication
+  deleteComment(id: String!): Comment!
+  # Requires authentication
+  favoriteArticle(slug: String!): Article!
+  # Requires authentication
+  unfavoriteArticle(slug: String!): Article!
+}
+
+# Optional
+type Subscription {
+  profileUpdated(id: String!): Profile!
+  followingUpdated: Profile!
+  newFollower: Profile!
+  lostFollower: Profile!
+  updateFeed(first: Int, last: Int, before: String, after: String): ArticleFeed!
+  updatedArticles(
+    tag: String
+    author: String
+    favorited: Boolean
+    first: Int
+    last: Int
+    before: String
+    after: String
+  ): ArticleFeed!
+  updatedArticle(id: String!): ArticleUpdate!
+  commentAdded(articleId: String!): Comment!
+  commentUpdated(articleId: String!): Comment!
+  commentRemoved(articleId: String!): Comment!
+}
+
+input LoginPayload {
+  email: String!
+  password: String!
+}
+
+input RegisterPayload {
+  username: String!
+  email: String!
+  password: String!
+}
+
+input UpdateMePayload {
+  email: String
+  username: String
+  password: String
+  bio: String
+  image: String
+}
+
+input CreateArticlePayload {
+  title: String!
+  description: String!
+  body: String!
+  tags: [String!]!
+}
+
+input UpdateArticlePayload {
+  slug: String!
+  title: String
+  description: String
+  body: String
+}
