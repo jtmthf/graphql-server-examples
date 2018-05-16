@@ -1,0 +1,38 @@
+type User {
+  id: ID! @unique
+  email: String! @unique
+  username: String! @unique
+  bio: String
+  image: String
+  following: [User!]! @relation(name: "UserFollowing")
+  followers: [User!]! @relation(name: "UserFollowing")
+  favoritedArticle: [Article!]! @relation(name: "UserFavoritedArticles")
+  articles: [Article!]! @relation(name: "ArticleAuthor", onDelete: CASCADE)
+}
+
+type Article {
+  id: ID! @unique
+  slug: String! @unique
+  title: String!
+  description: String!
+  body: String!
+  tags: [Tag!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  favoritedBy: [User!]! @relation(name: "UserFavoritedArticles")
+  author: User! @relation(name: "ArticleAuthor")
+  comments: [Comment!]!
+}
+
+type Comment {
+  id: ID! @unique
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  body: String!
+  author: User!
+}
+
+type Tag {
+  id: ID! @unique
+  name: String! @unique
+}
